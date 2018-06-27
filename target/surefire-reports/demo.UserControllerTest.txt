@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------------
+Test set: demo.UserControllerTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.926 s <<< FAILURE! - in demo.UserControllerTest
+testFindById(demo.UserControllerTest)  Time elapsed: 0.388 s  <<< ERROR!
+org.apache.http.client.ClientProtocolException: URI does not specify a valid host name: localhost:8099/demo/1
+	at demo.UserControllerTest.testFindById(UserControllerTest.java:27)
+
