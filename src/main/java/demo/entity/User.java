@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 
 @Table(name = "user")
@@ -14,6 +16,7 @@ public class User {
 
 	@Id
 	@Column (name="id")
+	@JsonProperty("id")
 	private Integer id;
 	
 	@Column (name="user_name", nullable=false)
