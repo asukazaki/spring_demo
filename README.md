@@ -38,6 +38,13 @@ GETとPOSTを受け取って、DBを操作するサンプルになっていま�
                └── UserControllerTest.java  
 
 ---
+## 事前準備
+maven install  
+MySql にresoucesからimport  
+STSにlombokをインストール  
+STSの環境設定で補完機能アップ  
+
+---
 ## 課題
 とりあえず動かしてみましょう！！
 
