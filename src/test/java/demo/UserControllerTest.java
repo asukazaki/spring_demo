@@ -27,16 +27,25 @@ public class UserControllerTest {
 	
 	@Test
 	public void testFindById() throws Exception {
+		int targetId = 1;
+		String targetName = "ITI太郎";
+		
 		CloseableHttpClient httpclient = HttpClients.createDefault();
-		HttpGet httpGet = new HttpGet(URL + 1);
+		HttpGet httpGet = new HttpGet(URL + targetId);
 		CloseableHttpResponse response = httpclient.execute(httpGet);
 		
 		assertThat(response.getStatusLine().getStatusCode(), is(200) );
 		
 		String responseBody = EntityUtils.toString(response.getEntity());
+		System.out.println(responseBody);
+		
+		// このやり方が正しいのかは分からないけど、
+		// [{"id":1,"userName":"ITI太郎"}] 
+		// この形式でくるからとりあえず削ってjson形式にする
 		responseBody = responseBody.substring(1, responseBody.length()-1);
 		ObjectMapper mapper = new ObjectMapper();
         User user = mapper.readValue(responseBody, User.class);
-		System.out.println(user.getUserName());
+		assertThat(user.getId(), is(targetId));
+		assertThat(user.getUserName(), is(targetName));
 	}
 }
