@@ -5,9 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import lombok.Data;
 
@@ -23,7 +21,6 @@ public class JobShift {
 	@Column (name="shift_start_time", nullable=false)
 	private String shiftStartTime;
 	
-//	@Transient
 	@OneToOne
 	@JoinColumn(name="id")
 	private User user;

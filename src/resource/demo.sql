@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: 2018 年 7 月 25 日 14:02
+-- Generation Time: 2018 年 7 月 26 日 01:34
 -- サーバのバージョン： 5.6.35
 -- PHP Version: 7.1.6
 
@@ -55,7 +55,7 @@ CREATE TABLE `holiday` (
 --
 
 INSERT INTO `holiday` (`id`, `month`, `day`, `name`) VALUES
-(1, '06', '06', '特別休暇'),
+(1, '06', '06', '6の日'),
 (2, '07', '16', '海の日');
 
 -- --------------------------------------------------------

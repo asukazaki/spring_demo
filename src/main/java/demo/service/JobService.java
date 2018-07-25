@@ -3,7 +3,6 @@ package demo.service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,20 +103,20 @@ public class JobService {
 	 * 曜日（数値）を曜日（文字列）に変換
 	 */
 	private String getDayOfWeekByString(DayOfWeek dayOfWeek) {
-		switch (dayOfWeek.getValue()) {
-		case Calendar.MONDAY :
+		switch (dayOfWeek) {
+		case MONDAY :
 			return "月";
-		case Calendar.TUESDAY:
+		case TUESDAY:
 			return "火";
-		case Calendar.WEDNESDAY:
+		case WEDNESDAY:
 			return "水";
-		case Calendar.THURSDAY:
+		case THURSDAY:
 			return "木";
-		case Calendar.FRIDAY:
+		case FRIDAY:
 			return "金";
-		case Calendar.SATURDAY:
+		case SATURDAY:
 			return "土";
-		case Calendar.SUNDAY:
+		case SUNDAY:
 			return "日";
 		}
 		return null;

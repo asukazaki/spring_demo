@@ -6,7 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -25,7 +24,6 @@ public class User {
 	@Column (name="user_name", nullable=false)
 	private String userName;
 	
-//	@Transient
 	@OneToOne(cascade = CascadeType.ALL, mappedBy="user")
 	private JobShift jobShift;
 }
