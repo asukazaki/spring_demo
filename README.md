@@ -42,6 +42,8 @@ GETとPOSTを受け取って、DBを操作するサンプルになっていま�
 
 ツールインストール、ポート合わせる  
 
+手順とつまずきやすい点は[note.md](note.md)
+
 maven install  
 STSにlombokをインストール  
 STSの環境設定で補完機能アップ  

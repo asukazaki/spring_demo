@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import demo.bean.JobInputBean;
 import demo.entity.Job;
 import demo.service.JobService;
 
+@CrossOrigin
 @RestController
 @RequestMapping("demo/jobs")
 public class JobsController {
@@ -22,6 +24,7 @@ public class JobsController {
 	@Autowired
 	JobService jobService;
 	
+	@CrossOrigin
 	@RequestMapping(value = "/{id}/{year}/{month}", method = RequestMethod.GET)
 	public List<Job> getJobsPerMonth(@PathVariable("id") int id,
 			@PathVariable("year") String year,@PathVariable("month") String month) {
