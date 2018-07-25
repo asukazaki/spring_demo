@@ -1,31 +1,30 @@
 package demo.entity;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.Data;
 
-@Table(name = "user")
+@Table(name = "job_shift")
 @Entity
 @Data
-public class User {
+public class JobShift {
 
 	@Id
 	@Column (name="id")
-	@JsonProperty("id")
 	private Integer id;
 	
-	@Column (name="user_name", nullable=false)
-	private String userName;
+	@Column (name="shift_start_time", nullable=false)
+	private String shiftStartTime;
 	
 //	@Transient
-	@OneToOne(cascade = CascadeType.ALL, mappedBy="user")
-	private JobShift jobShift;
+	@OneToOne
+	@JoinColumn(name="id")
+	private User user;
 }

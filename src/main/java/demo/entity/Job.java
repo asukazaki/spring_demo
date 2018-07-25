@@ -2,20 +2,16 @@ package demo.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+import javax.persistence.Transient;
 
 import lombok.Data;
 
 @Table(name = "jobs")
 @Entity
 @Data
-//@JsonFormat
 @IdClass(value=JobPk.class)
 public class Job {
 
@@ -34,14 +30,48 @@ public class Job {
 	private String endTime;
 	
 	@Column (name="rest_start_time", nullable=false)
-	private String restStratTime;
+	private String restStartTime;
 	
 	@Column (name="rest_end_time", nullable=false)
 	private String restEndTime;
 	
+	/**
+	 * -3 未打刻 or エラー
+	 * -2 欠勤
+	 * −1　遅刻
+	 * 0 デフォルト
+	 * 1　半休
+	 * 2  有給
+	 * ３ その他
+	 * 
+	 */
 	@Column (name="job_state_code", nullable=false)
 	private String jobStateCode;
 	
 	@Column (name="job_state_name", nullable=false)
 	private String jobStateName;
+	
+	/*
+	 * -1 未申請
+	 * 0 デフォルト
+	 * 1　申請済み
+	 * 2 承認済み
+	 */
+	@Column (name="approval_falg", nullable=true)
+	private int approvalFlag;
+	
+	@Transient
+	private String dayOfWeek;
+	
+	@Transient
+	private int workPerDay;
+	
+	@Transient 
+	private int restPerDay;
+	
+	@Transient 
+	private int overTimePerDay;
+	
+	
+	
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import demo.bean.JobInputBean;
+import demo.bean.JobOutputBean;
 import demo.entity.Job;
 import demo.service.JobService;
 
@@ -26,11 +27,11 @@ public class JobsController {
 	
 	@CrossOrigin
 	@RequestMapping(value = "/{id}/{year}/{month}", method = RequestMethod.GET)
-	public List<Job> getJobsPerMonth(@PathVariable("id") int id,
+	public JobOutputBean getJobsPerMonth(@PathVariable("id") int id,
 			@PathVariable("year") String year,@PathVariable("month") String month) {
 		
-		List<Job> list = jobService.getJobsPerMonth(id, year, month);;
-		return list;
+		JobOutputBean result = jobService.getJobsPerMonth(id, year, month);;
+		return result;
 	}
 	
 	@RequestMapping(value = "/{id}/", method = RequestMethod.GET)
