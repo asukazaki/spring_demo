@@ -3,6 +3,7 @@ package demo.service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -167,6 +168,7 @@ public class JobService {
 		}
 		// sort
 		resultList.sort((a,b) -> a.getDate().compareTo(b.getDate()));
+//		resultList.sort(Comparator.comparing(Job::getDate));
 		
 		JobOutputBean result = new JobOutputBean();
 		result.setId(id);
