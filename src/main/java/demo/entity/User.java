@@ -24,6 +24,12 @@ public class User {
 	@Column (name="user_name", nullable=false)
 	private String userName;
 	
-	@OneToOne(cascade = CascadeType.ALL, mappedBy="user")
-	private JobShift jobShift;
+	@Column (name="shift_start_time", nullable=false)
+	private String shiftStartTime;
+	
+	@Column (name="shift_end_time", nullable=false)
+	private String shiftEndTime;
+	
+//	@OneToOne(cascade = CascadeType.ALL, mappedBy="user")
+//	private JobShift jobShift;
 }

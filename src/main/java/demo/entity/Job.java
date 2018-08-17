@@ -46,10 +46,13 @@ public class Job {
 	 * 
 	 */
 	@Column (name="job_state_code", nullable=false)
-	private String jobStateCode;
+	private int jobStateCode;
 	
 	@Column (name="job_state_name", nullable=false)
 	private String jobStateName;
+	
+	@Column (name="tmp_shift_start_time", nullable=false)
+	private String tmpShiftStartTime;
 	
 	/*
 	 * -1 未申請
@@ -64,13 +67,19 @@ public class Job {
 	private String dayOfWeek;
 	
 	@Transient
-	private int workPerDay;
+	private int holydayStatus;
+	
+	@Transient
+	private String holydayName;
+	
+	@Transient
+	private String workPerDay;
 	
 	@Transient 
 	private int restPerDay;
 	
 	@Transient 
-	private int overTimePerDay;
+	private String overTimePerDay;
 	
 	
 	
