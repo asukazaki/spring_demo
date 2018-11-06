@@ -12,7 +12,12 @@ public class JobInputBean {
 	private String startTime;
 	
 	private String endTime;
+	private String restStartTime;
 	private String restEndTime;
+	
+	// 打刻タイプ
+	private String dakokuType;
+	
 	private String jobStateCode;
 	private String jobStateName;
 }

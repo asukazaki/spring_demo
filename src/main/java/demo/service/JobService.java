@@ -213,12 +213,18 @@ public class JobService {
 		SimpleDateFormat toDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		SimpleDateFormat toStringFormat = new SimpleDateFormat("yyyy/MM/dd");
 		for(Map.Entry<String, Job> entry :map.entrySet()) {
+			
+			Job job = entry.getValue();
+			
 			// 月初めから現在の日付まで
 			if(entry.getKey().compareTo(endDay) > 0) {
-				break;
+				// TODO: startTime に値があるとDBが不整合
+				job.setStartTime("-");
+				job.setEndTime("-");
+				resultList.add(job);
+				continue;
 			}
 
-			Job job = entry.getValue();
 			Date dateTo = null;
 			Date dateFrom = null;
 
@@ -256,6 +262,12 @@ public class JobService {
 			if(job.getHolydayStatus() != 0) {
 				
 			}
+			
+			// 退勤時間あるか
+			if(job.getEndTime() == null || job.getEndTime().isEmpty()) {
+				resultList.add(job);
+				continue;
+			}
 
 			// TODO:総労働時間、残業時間、休憩時間を計算
 			try {
@@ -264,6 +276,7 @@ public class JobService {
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				continue;
 			}
 			Double workPerDayByHour =  ((double)(dateFrom.getTime() - dateTo.getTime()) / (1000 * 60 * 60));
 			job.setWorkPerDay(workPerDayByHour.toString());
@@ -312,14 +325,31 @@ public class JobService {
 		if(jobOpt.isPresent()) {
 			job = jobOpt.get();
 			// json body からきた情報を追加
-			// job.set...
+			setDakoku(input,job);
 		} else {					
 			job.setId(id);
 			job.setDate(sb.toString());
+			setDakoku(input,job);
 			// ...
 		}
 
 		return jobsRepository.save(job);
 	}
+
+	private void setDakoku(JobInputBean input, Job job) {
+		switch (input.getDakokuType()) {
+		case "SYUKKIN":
+			job.setStartTime(input.getStartTime());
+			break;
+
+		case "TAIKIN":
+			job.setEndTime(input.getEndTime());
+			break;
+		default:
+			break;
+		}
+		
+	}
+	
 
 }
