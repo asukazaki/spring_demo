@@ -39,7 +39,8 @@ public class JobsController {
 		List<Job> list = jobService.findById(id);
 		return list;
 	}
-	
+
+	@CrossOrigin
 	@RequestMapping(value = "/{id}/{year:^[0-9]{4}$}/{month:^[0-9]{2}$}/{day:^[0-9]{2}$}", method = RequestMethod.POST)
 	public Job createJob(@PathVariable("id") int id,
 			@PathVariable("year") String year,@PathVariable("month") String month,

@@ -1,5 +1,6 @@
 package demo.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,6 +21,8 @@ public interface JobsRepository extends JpaRepository<Job, JobPk>{
 	// By の後ろにはAND, OR, BETWEEN, LIKE などが使える
 	// これで↑と同じ (この場合は引数に％事前につけて）
 	List<Job> findByIdAndDateLike(int id, String yearMonth);
+	
+	List<Job> findByIdAndDateBetween(int id, LocalDate dateFrom, LocalDate dateTo);
 
 	@Query("SELECT j FROM Job j WHERE j.id = :id")
 	public List<Job> getAllById(@Param("id")int id);

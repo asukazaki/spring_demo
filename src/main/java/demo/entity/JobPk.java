@@ -1,9 +1,8 @@
 package demo.entity;
 
 import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.Id;
+import java.sql.Date;
+import java.time.LocalDate;
 
 import lombok.Data;
 
@@ -11,6 +10,10 @@ import lombok.Data;
 public class JobPk implements Serializable{
 
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Integer id;
-	private String date;
+	private LocalDate date;
 }

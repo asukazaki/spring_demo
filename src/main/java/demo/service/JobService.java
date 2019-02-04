@@ -1,14 +1,19 @@
 package demo.service;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -18,16 +23,20 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ajd4jp.AJD;
+import ajd4jp.AJDException;
+import ajd4jp.Holiday;
+import ajd4jp.Month;
 import demo.bean.JobInputBean;
 import demo.bean.JobOutputBean;
-import demo.entity.Holiday;
+//import demo.entity.Holiday;
 import demo.entity.Job;
 import demo.entity.JobPk;
 import demo.entity.User;
-import demo.repository.HolidayRepository;
 import demo.repository.JobsRepository;
 import demo.repository.UserRepository;
 import demo.util.constance.JobStatus;
+import demo.utils.time.HolidayDate;
 
 @Service
 @Transactional
@@ -39,8 +48,8 @@ public class JobService {
 	JobsRepository jobsRepository;	
 	@Autowired
 	UserRepository userRepository;
-	@Autowired
-	HolidayRepository holidayRepository;
+	
+	HolidayDate holidayDate = new HolidayDate();
 
 	public JobOutputBean getJobsPerMonth(int id, String year, String month){
 
@@ -48,8 +57,11 @@ public class JobService {
 		sb.append(DELIMITER_DATE);
 		sb.append(month);	
 		//		sb.append("%");
-		List<Job>list = jobsRepository.findJobsPerMonth(id, sb.toString());
+//		List<Job>list = jobsRepository.findJobsPerMonth(id, sb.toString());
 		//		List<Job>list = jobsRepository.findByIdAndDateLike(id, sb.toString());	
+		
+		LocalDate targetMonthFirtstDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), 1);
+		List<Job>list = jobsRepository.findByIdAndDateBetween(id, targetMonthFirtstDate, targetMonthFirtstDate.plusMonths(1));
 
 		/*
 		 * 残業時間計算したり、、
@@ -69,16 +81,35 @@ public class JobService {
 
 	private void setHolyday(String year, String month, Map<String, Job> map) {
 		// 祝日参照
-		List<Holiday>holidays = holidayRepository.findByMonth(month);
-		for(Holiday holiday : holidays) {
-			if(map.containsKey(holiday.getDay())) {
-				Job job = map.get(holiday.getDay());
-				job.setDayOfWeek(job.getDayOfWeek() + "(" + holiday.getName() + ")");
-				job.setHolydayName(holiday.getName());
-				job.setHolydayStatus(3);
-				map.put(holiday.getDay(), job);
+		try {
+			List<String[]>targetMonthHolidays = holidayDate.getHolidayTargetMonth(year, month);
+			if(!targetMonthHolidays.isEmpty()) {
+				for(String[] holidayDateAndName : targetMonthHolidays) {
+					Job job = map.get(holidayDateAndName[0]);
+		        	job.setHoliday(true);
+		        	job.setHolydayName(holidayDateAndName[1]);
+				}
 			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
+//		try {
+//			Month ajdMonth = new Month(Integer.parseInt(year),Integer.parseInt(month));
+//
+//	    for (AJD day: ajdMonth.getDays()) {	        
+//	        Holiday h = Holiday.getHoliday(day);
+//	        if(h != null) {
+//	        	Job job = map.get(String.format("%02d", day.getDay()));
+//	        	job.setHoliday(true);
+//	        	job.setHolydayName(h.getName(day));
+//	        }
+//	      }
+//		} catch (NumberFormatException | AJDException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 	/**
@@ -92,7 +123,9 @@ public class JobService {
 	private Map<String, Job> fillInTheBlank(int id, String year, String month,List<Job> list) {
 		Map<String, Job> map = new TreeMap<>();
 		for(Job j : list) {
-			map.put(j.getDate().substring(j.getDate().length()-2, j.getDate().length()), j);
+			// 1~31
+			int dayOfMonth = j.getDate().getDayOfMonth();
+			map.put(String.format("%02d", dayOfMonth), j);
 		}
 
 		// 月の最終日取得
@@ -106,78 +139,27 @@ public class JobService {
 			if(map.containsKey(dayKey)) {
 				Job job = map.get(dayKey);
 				DayOfWeek dayOfWeek = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), i).getDayOfWeek();
-				setDayOfWeek(job,dayOfWeek);
+				job.setDayOfWeek(dayOfWeek.getValue());
+				job.setDayOfWeekDisplayName(dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.JAPANESE));
 				map.put(dayKey, job);
 			} else {
 				// listにない
 				Job job = new Job();
 				job.setId(id);
-				job.setDate(year + DELIMITER_DATE + month + DELIMITER_DATE + dayKey);
-				//				String dayOfWeekString = getDayOfWeekByString(LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), i).getDayOfWeek());
+				LocalDate targetDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(dayKey));
+				job.setDate(targetDate);
+				
 				DayOfWeek dayOfWeek = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), i).getDayOfWeek();
-				setDayOfWeek(job,dayOfWeek);
+				job.setDayOfWeek(dayOfWeek.getValue());
+				job.setDayOfWeekDisplayName(dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.JAPANESE));
+				if(targetDate.isAfter(LocalDate.now())) {
+					job.setFutureDate(true);
+				}
 				map.put(dayKey, job);
 			}
 		}
 
 		return map;
-	}
-
-	private void setDayOfWeek(Job job, DayOfWeek dayOfWeek) {
-		switch (dayOfWeek) {
-		case MONDAY :
-			job.setDayOfWeek("月");
-			job.setHolydayStatus(0);
-			return;
-		case TUESDAY:
-			job.setDayOfWeek("火");
-			job.setHolydayStatus(0);
-			return;
-		case WEDNESDAY:
-			job.setDayOfWeek("水");
-			job.setHolydayStatus(0);
-			return;
-		case THURSDAY:
-			job.setDayOfWeek("木");
-			job.setHolydayStatus(0);
-			return;
-		case FRIDAY:
-			job.setDayOfWeek("金");
-			job.setHolydayStatus(0);
-			return;
-		case SATURDAY:
-			job.setDayOfWeek("土");
-			job.setHolydayStatus(1);
-			return;
-		case SUNDAY:
-			job.setDayOfWeek("日");
-			job.setHolydayStatus(2);
-			return;
-		}
-
-	}
-
-	/*
-	 * 曜日（数値）を曜日（文字列）に変換
-	 */
-	private String getDayOfWeekByString(DayOfWeek dayOfWeek) {
-		switch (dayOfWeek) {
-		case MONDAY :
-			return "月";
-		case TUESDAY:
-			return "火";
-		case WEDNESDAY:
-			return "水";
-		case THURSDAY:
-			return "木";
-		case FRIDAY:
-			return "金";
-		case SATURDAY:
-			return "土";
-		case SUNDAY:
-			return "日";
-		}
-		return null;
 	}
 
 	// TODO: ここはインターフェイスを実装するようにして
@@ -194,87 +176,111 @@ public class JobService {
 		// シフトタイム取得
 		User user = userRepository.getOne(id);
 		//		String usersShiftStartTime = user.getJobShift().getShiftStartTime();
-		String usersShiftStartTime = user.getShiftStartTime();
-		String usersShiftEndTime = user.getShiftEndTime();
+		LocalTime usersShiftStartTime = user.getShiftStartTime();
+//		LocalTime usersShiftEndTime = user.getShiftEndTime();
 
 		List<Job> resultList = new ArrayList<>();
 		Double overTimePerMonth = 0D;
-
-		String endDay;
-		if(month.equals(String.format("%2d", LocalDate.now().getMonth().getValue()))) {
-			endDay = String.format("%02d", LocalDate.now().getDayOfMonth());
-		}else {
-			endDay = String.format("%02d", LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), 1).lengthOfMonth());
-		}
-//		 現在の日付を取得
-//		String todayOfMonth = String.format("%02d", LocalDate.now().getDayOfMonth());
-
-		// なんかいけてない…
-		SimpleDateFormat toDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		SimpleDateFormat toStringFormat = new SimpleDateFormat("yyyy/MM/dd");
+		
 		for(Map.Entry<String, Job> entry :map.entrySet()) {
-			// 月初めから現在の日付まで
-			if(entry.getKey().compareTo(endDay) > 0) {
-				break;
-			}
-
+			
 			Job job = entry.getValue();
-			Date dateTo = null;
-			Date dateFrom = null;
+			
+			// 現在日付より以前のものだけを計算対象
+			if(job.isFutureDate()) {
+				resultList.add(job);
+				continue;
+			}
+			job.setErrorMessages(new ArrayList<String>());
 
 			// 打刻時間
-			String startTime = job.getStartTime();
+			LocalTime startTime = job.getStartTime();
 
 			// 打刻されているか
-			if(startTime == null || startTime.isEmpty()) {
-				// シフトのある日か
-				// TODO: holydayStatusでいい？
-				if(job.getHolydayStatus() != 0) {
+			if(startTime == null) {
+				// 土日祝日か
+				if(isHoliday(job)) {
+					job.setJobStateCode(JobStatus.NORMAL.getCode());
+					job.setDakokuError(false);
+				} else {
+					// TODO: 未使用　（未打刻か遅刻かとかの判別）
 					job.setJobStateCode(JobStatus.BRANK.getCode());
 					job.setJobStateName(JobStatus.BRANK.name());
-				}else {
-					job.setJobStateCode(JobStatus.NORMAL.getCode());
+					
+					job.setDakokuError(true);
+					job.addErrorMessage("打刻されていません");
 				}
 				resultList.add(job);
 				continue;
 			}
 
 			// シフト変更届けあるか
-			if(job.getTmpShiftStartTime() !=null && !job.getTmpShiftStartTime().isEmpty()) {
-				usersShiftStartTime = job.getTmpShiftStartTime();
-			}
+//			if(job.getTmpShiftStartTime() !=null && !job.getTmpShiftStartTime().isEmpty()) {
+//				usersShiftStartTime = job.getTmpShiftStartTime();
+//			}
 
 			// 遅刻か
-			if(usersShiftStartTime.compareTo(job.getStartTime()) < 0) {
+			// isAfter(),isBefore()は等しい時trueを返す
+			if(job.getStartTime().isAfter(usersShiftStartTime)) {
+				// TODO: 未使用　（遅刻、未打刻の判別用)
 				job.setJobStateCode(JobStatus.LATE.getCode());
 				job.setJobStateName(JobStatus.LATE.name());
-			} else {
-				job.setJobStateCode(JobStatus.NORMAL.getCode());
-			}
-
-			// TODO:休日出勤	
-			if(job.getHolydayStatus() != 0) {
 				
+				job.setDakokuError(true);
+				job.addErrorMessage("遅刻です");
+			} else {
+				// iruka?
+				job.setJobStateCode(JobStatus.NORMAL.getCode());
+				job.setJobStateName(JobStatus.NORMAL.name());
 			}
-
-			// TODO:総労働時間、残業時間、休憩時間を計算
-			try {
-				dateTo = toDateFormat.parse(job.getDate() + " " + job.getStartTime());
-				dateFrom = toDateFormat.parse(job.getDate() + " " + job.getEndTime());
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			Double workPerDayByHour =  ((double)(dateFrom.getTime() - dateTo.getTime()) / (1000 * 60 * 60));
-			job.setWorkPerDay(workPerDayByHour.toString());
 			
-			// TODO: stab---------------------------
-			job.setRestPerDay(1);
-			Double overTimePerDay = workPerDayByHour - 8D;
-			job.setOverTimePerDay(String.valueOf(overTimePerDay));
-			overTimePerMonth += overTimePerDay;
-			// ---------------------------------------
-
+			// TODO:休日出勤	
+//			if(job.getHolydayStatus() != 0) {
+//				
+//			}
+			
+			// 退勤時間、総労働時間
+			
+			// 当日
+			if(job.getDate().getDayOfMonth() == LocalDate.now().getDayOfMonth()) {
+				resultList.add(job);
+				continue;
+			}
+			
+			// 退勤時間あるか
+			if(job.getEndTime() == null) {
+				job.setDakokuError(true);
+				job.addErrorMessage("退勤時間の打刻がありません");
+				resultList.add(job);
+				continue;
+			}
+			
+			// 総労働時間
+			// TODO: 休憩時間引くとか
+			/*
+			 * シフト労働時間　＞　総労働時間
+			 * 　　-> 休憩時間１と計算。残業時間は単純な引き算でだす
+			 * シフト労働時間　＜＝　総労働時間
+			 * 　　->　休憩時間なし。残業時間０と計算
+			 */
+			Duration shiftTimeDuration = Duration.between(user.getShiftStartTime(), user.getShiftEndTime());
+			
+			Duration duration = Duration.between(job.getStartTime(), job.getEndTime());
+			
+			if(shiftTimeDuration.compareTo(duration) < 0) {
+				duration = duration.minusHours(1);
+				Long overTimePerDay = duration.minus(shiftTimeDuration).toMinutes();
+				job.setOverTimePerDay(String.format("%.1f", (Double.valueOf(overTimePerDay) / 60D )));
+				job.setRestPerDay(1);
+			} else {
+				// iruka ??
+//				job.setRestPerDay(0);
+				job.setOverTimePerDay("-");
+			}
+			Long durationMinutes = duration.toMinutes();
+//			Double workPerDayByHour = Double.valueOf(String.format("%.1f", (Double.valueOf(durationMinutes) / 60D )));
+			job.setWorkPerDay(String.format("%.1f", (Double.valueOf(durationMinutes) / 60D )));
+			
 			resultList.add(job);
 		}
 		
@@ -290,6 +296,14 @@ public class JobService {
 		return result;
 	}
 
+	private boolean isHoliday(Job job) {
+		if (job.getDayOfWeek() == DayOfWeek.SATURDAY.getValue() || job.getDayOfWeek() == DayOfWeek.SUNDAY.getValue()
+				|| job.isHoliday()) {
+			return true;
+		}
+		return false;
+	}
+
 	public List<Job> findById(int id) {
 		return jobsRepository.getAllById(id);
 	}
@@ -299,12 +313,9 @@ public class JobService {
 		JobPk key = new JobPk();
 		key.setId(id);
 
-		StringBuilder sb = new StringBuilder(year);
-		sb.append(DELIMITER_DATE);
-		sb.append(month);
-		sb.append(DELIMITER_DATE);
-		sb.append(day);
-		key.setDate(sb.toString());
+		LocalDate todayDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
+//		key.setDate(java.sql.Date.valueOf(todayDate));
+		key.setDate(todayDate);
 
 		Optional<Job> jobOpt = jobsRepository.findById(key);
 
@@ -312,14 +323,31 @@ public class JobService {
 		if(jobOpt.isPresent()) {
 			job = jobOpt.get();
 			// json body からきた情報を追加
-			// job.set...
+			setDakoku(input,job);
 		} else {					
 			job.setId(id);
-			job.setDate(sb.toString());
+			job.setDate(todayDate);
+			setDakoku(input,job);
 			// ...
 		}
 
-		return jobsRepository.save(job);
+		return jobsRepository.saveAndFlush(job);
 	}
+
+	private void setDakoku(JobInputBean input, Job job) {
+		switch (input.getDakokuType()) {
+		case "SYUKKIN":
+			job.setStartTime(input.getStartTime());
+			break;
+
+		case "TAIKIN":
+			job.setEndTime(input.getEndTime());
+			break;
+		default:
+			break;
+		}
+		
+	}
+	
 
 }
