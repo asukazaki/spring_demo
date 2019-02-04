@@ -1,19 +1,28 @@
 package demo.bean;
 
 
+import java.time.LocalTime;
+
 import javax.validation.constraints.Pattern;
+
+import org.apache.tomcat.jni.Local;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import lombok.Data;
 
 @Data
 public class JobInputBean {
 
-	@Pattern(regexp = "^[0-9]{2}:[0-9]{2}:[0-9]{2}$")
-	private String startTime;
+	@DateTimeFormat(pattern = "HH:mm")
+	private LocalTime startTime;
 	
-	private String endTime;
-	private String restStartTime;
-	private String restEndTime;
+	@DateTimeFormat(pattern = "HH:mm")
+	private LocalTime endTime;
+	
+	@DateTimeFormat(pattern = "HH:mm")
+	private LocalTime restStartTime;
+	@DateTimeFormat(pattern = "HH:mm")
+	private LocalTime restEndTime;
 	
 	// 打刻タイプ
 	private String dakokuType;

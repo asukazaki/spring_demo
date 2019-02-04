@@ -1,11 +1,15 @@
 package demo.entity;
 
+import java.time.LocalTime;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -25,10 +29,12 @@ public class User {
 	private String userName;
 	
 	@Column (name="shift_start_time", nullable=false)
-	private String shiftStartTime;
-	
+	@DateTimeFormat(pattern = "HH:mm")
+	private LocalTime shiftStartTime;
+		
 	@Column (name="shift_end_time", nullable=false)
-	private String shiftEndTime;
+	@DateTimeFormat(pattern = "HH:mm")
+	private LocalTime shiftEndTime;
 	
 //	@OneToOne(cascade = CascadeType.ALL, mappedBy="user")
 //	private JobShift jobShift;

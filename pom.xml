@@ -80,6 +80,14 @@
     <version>1.3</version>
     <scope>test</scope>
 </dependency>
+<!-- <dependency>
+  <groupId>jp.osdn</groupId>
+  <artifactId>ajd4jp</artifactId>
+  <version>1.4.2.2018</version>
+  <scope>system</scope>
+  <systemPath>${basedir}/lib/ajd4jp-1.4.2.2018.jar</systemPath>
+</dependency> -->
+
 		
 	</dependencies>
 
