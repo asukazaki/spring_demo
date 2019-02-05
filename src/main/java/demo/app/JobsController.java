@@ -51,4 +51,14 @@ public class JobsController {
 		
 	}
 	
+	@RequestMapping(value = "/{id}/{year:^[0-9]{4}$}/{month:^[0-9]{2}$}", method = RequestMethod.POST)
+	public List<Job> updateJobs(@PathVariable("id") int id,
+			@PathVariable("year") String year,@PathVariable("month") String month,
+			@Validated @RequestBody List<Job> input) {
+		
+		List<Job> updatedJobs = jobService.updateJobs(id,year,month,input);
+		return updatedJobs;
+		
+	}
+	
 }
