@@ -23,10 +23,6 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ajd4jp.AJD;
-import ajd4jp.AJDException;
-import ajd4jp.Holiday;
-import ajd4jp.Month;
 import demo.bean.JobInputBean;
 import demo.bean.JobOutputBean;
 //import demo.entity.Holiday;
@@ -347,6 +343,40 @@ public class JobService {
 			break;
 		}
 		
+	}
+
+	public List<Job> updateJobs(int id, String year, String month, List<Job> input) {
+		
+		// Duplicate になってしまう。。
+//		List<Job> resultList = jobsRepository.saveAll(input);
+		
+		// 1つずつアクセスして遅くないか？
+		List<Job> updateList = new ArrayList<>();
+		for(Job job : input) {			
+			JobPk key = new JobPk(job.getId(),job.getDate());
+			Optional<Job> jobOpt = jobsRepository.findById(key);
+			if(jobOpt.isPresent()) {
+				Job oldJob = jobOpt.get();
+				
+				// この時点でEntityManagerのPersistentContextは更新される。
+				// 実際にDBが更新されるのはトランザクション終了時（デフォルトなのでメソッドが例外なく終わった時、多分)
+				
+				oldJob.setStartTime(job.getStartTime());
+				oldJob.setEndTime(job.getEndTime());
+				updateList.add(oldJob);
+			} else {
+				updateList.add(job);
+			}
+		}
+//		try {
+//			
+//		} catch(){
+//			
+//		}
+		List<Job> resultList = jobsRepository.saveAll(updateList);
+		jobsRepository.flush();
+		// TODO Auto-generated method stub
+		return resultList;
 	}
 	
 

@@ -10,6 +10,13 @@ import lombok.Data;
 public class JobPk implements Serializable{
 
 
+	public JobPk(Integer id, LocalDate date) {
+		this.id = id;
+		this.date = date;
+	}
+	public JobPk() {
+		// TODO Auto-generated constructor stub
+	}
 	/**
 	 * 
 	 */
