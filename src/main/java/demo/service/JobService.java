@@ -264,7 +264,7 @@ public class JobService {
 			Duration duration = Duration.between(job.getStartTime(), job.getEndTime());
 			
 			if(shiftTimeDuration.compareTo(duration) < 0) {
-				duration = duration.minusHours(1);
+//				duration = duration.minusHours(1);
 				Long overTimePerDay = duration.minus(shiftTimeDuration).toMinutes();
 				job.setOverTimePerDay(String.format("%.1f", (Double.valueOf(overTimePerDay) / 60D )));
 				job.setRestPerDay(1);
