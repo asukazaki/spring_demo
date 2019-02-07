@@ -57,7 +57,7 @@ public class JobService {
 		//		List<Job>list = jobsRepository.findByIdAndDateLike(id, sb.toString());	
 		
 		LocalDate targetMonthFirtstDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), 1);
-		List<Job>list = jobsRepository.findByIdAndDateBetween(id, targetMonthFirtstDate, targetMonthFirtstDate.plusMonths(1));
+		List<Job>list = jobsRepository.findByIdAndDateBetween(id, targetMonthFirtstDate, targetMonthFirtstDate.plusMonths(1).minusDays(1));
 
 		/*
 		 * 残業時間計算したり、、
