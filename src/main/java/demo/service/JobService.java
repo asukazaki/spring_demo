@@ -266,8 +266,11 @@ public class JobService {
 			if(shiftTimeDuration.compareTo(duration) < 0) {
 //				duration = duration.minusHours(1);
 				Long overTimePerDay = duration.minus(shiftTimeDuration).toMinutes();
-				job.setOverTimePerDay(String.format("%.1f", (Double.valueOf(overTimePerDay) / 60D )));
+				Double overTimePerDayHour = (Double.valueOf(overTimePerDay) / 60D );
+				job.setOverTimePerDay(String.format("%.1f",overTimePerDayHour));
 				job.setRestPerDay(1);
+				// 月の合計残業時間を一応だす
+				overTimePerMonth += overTimePerDayHour;
 			} else {
 				// iruka ??
 //				job.setRestPerDay(0);
