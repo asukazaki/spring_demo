@@ -250,6 +250,14 @@ public class JobService {
 				resultList.add(job);
 				continue;
 			}
+
+			// 出勤時間　＜　退勤時間になっているか
+			if (job.getStartTime() == null || job.getEndTime() == null) {
+				continue;
+			} else if(job.getStartTime().isAfter(job.getEndTime())) {
+				job.setDakokuError(true);
+				job.addErrorMessage("出勤時間が退勤時間より後になっています");
+			}
 			
 			// 総労働時間
 			// TODO: 休憩時間引くとか
